@@ -1,3 +1,5 @@
+import datetime
+
 import streamlit as st
 import plost
 import pandas as pd
@@ -40,7 +42,18 @@ cs.execute("""SELECT
 cond_data = cs.fetch_pandas_all()
 #cond_data['DIAGNOSIS_YEAR_MONTH'] = pd.to_datetime(cond_data['DIAGNOSIS_YEAR_MONTH'], format='%Y-%m').dt.date
 
+cs.execute("""SELECT * FROM CLAIMS_DATA_PROFILING.DATES.DATE_SUMMARY
+              WHERE YEAR_MONTH >= '201601' AND YEAR_MONTH <> 'Duplicate';""")
+quality_data = cs.fetch_pandas_all()
+quality_data['YEAR_MONTH'] = pd.to_datetime(quality_data['YEAR_MONTH'],
+                                            format='%Y%m').dt.date + datetime.timedelta(days=1)
 
+st.markdown("### Date Summary")
+plost.time_hist(data=quality_data, date='YEAR_MONTH', x_unit='month', y_unit='year',
+                color=dict(field='MEMBER_MONTHS', type='quantitative'), aggregate='sum',
+                height=400, use_container_width=True)
+
+st.divider()
 st.markdown("### PMPM Breakdown and Pharmacy Spend Trends")
 start_date, end_date = st.select_slider("Select date range for claims summary",
                                         options=pmpm_data['YEAR_MONTH'].sort_values(),
