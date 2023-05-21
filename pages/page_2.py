@@ -47,11 +47,18 @@ cs.execute("""SELECT * FROM CLAIMS_DATA_PROFILING.DATES.DATE_SUMMARY
 quality_data = cs.fetch_pandas_all()
 quality_data['YEAR_MONTH'] = pd.to_datetime(quality_data['YEAR_MONTH'],
                                             format='%Y%m').dt.date + datetime.timedelta(days=1)
+quality_data.dropna(axis=1, how='all', inplace=True)
 
 st.markdown("### Date Summary")
-plost.time_hist(data=quality_data, date='YEAR_MONTH', x_unit='month', y_unit='year',
-                color=dict(field='MEMBER_MONTHS', type='quantitative'), aggregate='sum',
-                height=400, use_container_width=True)
+sum_col1, sum_col2 = st.columns([1, 3])
+with sum_col1:
+    metric_options = [x for x in quality_data.columns if x != 'YEAR_MONTH']
+    sum_metric = st.radio(label='Select Mertic for Summary Display',
+                             options=metric_options)
+with sum_col2:
+    plost.time_hist(data=quality_data, date='YEAR_MONTH', x_unit='month', y_unit='year',
+                    color=dict(field=sum_metric, type='quantitative'), aggregate='sum',
+                    height=400, use_container_width=True)
 
 st.divider()
 st.markdown("### PMPM Breakdown and Pharmacy Spend Trends")
