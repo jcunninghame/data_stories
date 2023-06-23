@@ -309,6 +309,7 @@ with top_col1:
         title=title,
         color=PALETTE["4-cerulean"],
         height="350px",
+        sort_col="paid_amount_pmpm",
     )
 with top_col2:
     title = "Top 5 Conditions by PMPM"
@@ -320,6 +321,7 @@ with top_col2:
         top_n=5,
         color=PALETTE["melon"],
         height="350px",
+        sort_col="paid_amount_pmpm",
     )
 with bot_col1:
     title = "Top 10 Providers by PMPM"
@@ -331,6 +333,7 @@ with bot_col1:
         top_n=10,
         color=PALETTE["french-grey"],
         height="350px",
+        sort_col="paid_amount_pmpm",
     )
 with bot_col2:
     title = "PMPM by Claim Type"
@@ -341,6 +344,7 @@ with bot_col2:
         title=title,
         color=PALETTE["2-light-sky-blue"],
         height="350px",
+        sort_col="paid_amount_pmpm",
     )
 
 

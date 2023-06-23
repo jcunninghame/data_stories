@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 from streamlit_echarts import st_echarts
 import util
@@ -148,13 +149,17 @@ def pop_grouped_bar(df):
     st_echarts(options=option)
 
 
-def generic_simple_v_bar(df, x, y, title, color=None, height="300px", top_n=None):
+def generic_simple_v_bar(
+    df, x, y, title, color=None, height="300px", top_n=None, sort_col=None
+):
     if color is None:
         color = ""
-    df.sort_values(by=x, inplace=True, ascending=False)
+    if sort_col:
+        df.sort_values(by=sort_col, inplace=True, ascending=False)
     if top_n:
         df = df.head(top_n)
-    df.sort_values(by=x, inplace=True, ascending=True)
+    if sort_col:
+        df.sort_values(by=sort_col, inplace=True, ascending=True)
     options = {
         "xAxis": {"type": "value"},
         "yAxis": {"type": "category", "data": df[y].tolist()},
@@ -162,6 +167,57 @@ def generic_simple_v_bar(df, x, y, title, color=None, height="300px", top_n=None
         "title": {"text": title},
         "tooltip": {"position": "top"},
         "grid": {"containLabel": True},
+    }
+    st_echarts(options=options, height=height)
+
+
+def generic_simple_h_bar(df, x, y, title, color=None, height="300px", top_n=None):
+    if color is None:
+        color = ""
+    df.sort_values(by=x, inplace=True, ascending=False)
+    if top_n:
+        df = df.head(top_n)
+    df.sort_values(by=x, inplace=True, ascending=True)
+    options = {
+        "yAxis": {"type": "value"},
+        "xAxis": {"type": "category", "data": df[x].tolist()},
+        "series": [{"data": df[y].tolist(), "type": "bar", "color": color}],
+        "title": {"text": title},
+        "tooltip": {"position": "top"},
+        "grid": {"containLabel": True},
+    }
+    st_echarts(options=options, height=height)
+
+
+def donut_chart(df, quant, category, title, height="300px", colors=None):
+    if colors is None:
+        colors = []
+    data_rows = [
+        {"name": row[category], "value": row[quant]} for _, row in df.iterrows()
+    ]
+    options = {
+        "tooltip": {"trigger": "item"},
+        "legend": {"bottom": "5%", "left": "center"},
+        "title": {"text": title},
+        "series": [
+            {
+                "type": "pie",
+                "radius": ["40%", "70%"],
+                "avoidLabelOverlap": False,
+                "itemStyle": {
+                    "borderRadius": 10,
+                    "borderColor": "#fff",
+                    "borderWidth": 2,
+                },
+                "label": {"show": False, "position": "center"},
+                "emphasis": {
+                    "label": {"show": True, "fontSize": "40", "fontWeight": "bold"}
+                },
+                "labelLine": {"show": False},
+                "color": colors,
+                "data": data_rows,
+            }
+        ],
     }
     st_echarts(options=options, height=height)
 

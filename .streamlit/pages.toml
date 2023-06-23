@@ -1,3 +1,7 @@
 [[pages]]
 path = "financial_summary.py"
 name = "Financial Overview"
+
+[[pages]]
+path = "pages/01_patient_summary.py"
+name = "Patient Summary"

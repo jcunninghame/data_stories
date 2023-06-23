@@ -3,7 +3,7 @@ import pandas as pd
 import dask.dataframe as dd
 import util
 
-conn = util.connection(database="dev_lipsa")
+conn = util.connection(database="medicare_lds_five_percent")
 s3_uri = "s3://tuva-public-resources/data-extracts/lds/"
 
 global_converters = {"year": str}
@@ -351,25 +351,25 @@ def pmpm_data():
 
 
 @st.cache_data
-def gender_data():
+def patient_gender_data():
     query = """SELECT GENDER, COUNT(*) AS COUNT FROM CORE.PATIENT GROUP BY 1;"""
 
-    data = pd.read_csv(s3_uri + "gender_data.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
 @st.cache_data
-def race_data():
+def patient_race_data():
     query = """SELECT RACE, COUNT(*) AS COUNT FROM CORE.PATIENT GROUP BY 1;"""
 
-    data = pd.read_csv(s3_uri + "race_data.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
 @st.cache_data
-def age_data():
+def patient_age_data():
     query = """SELECT CASE
-                        WHEN div0(current_date() - BIRTH_DATE, 365) < 49 THEN '34-48'
+                        WHEN div0(current_date() - BIRTH_DATE, 365) < 49 THEN '48 and Under'
                         WHEN div0(current_date() - BIRTH_DATE, 365) >= 49 AND div0(current_date() - BIRTH_DATE, 365) < 65 THEN '49-64'
                         WHEN div0(current_date() - BIRTH_DATE, 365) >= 65 AND div0(current_date() - BIRTH_DATE, 365) < 79 THEN '65-78'
                         WHEN div0(current_date() - BIRTH_DATE, 365) >= 79 AND div0(current_date() - BIRTH_DATE, 365) < 99 THEN '79-98'
@@ -380,8 +380,16 @@ def age_data():
                 GROUP BY 1
                 ORDER BY 1;"""
 
-    data = pd.read_csv(s3_uri + "age_data.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
+
+
+@st.cache_data
+def patient_state_data():
+    query = """SELECT STATE, COUNT(*) AS COUNT
+                FROM CORE.PATIENT
+                GROUP BY 1;"""
+    data = util.safe_to_pandas(conn, query)
 
 
 @st.cache_data
