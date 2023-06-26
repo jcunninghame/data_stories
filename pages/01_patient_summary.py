@@ -61,3 +61,7 @@ comp.generic_simple_h_bar(
     color=PALETTE["3-air-blue"],
     height="500px",
 )
+
+comp.state_map_chart(
+    patient_state, "state", "count", "Patient Count by State", height="500px"
+)

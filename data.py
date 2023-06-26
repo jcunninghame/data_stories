@@ -386,10 +386,14 @@ def patient_age_data():
 
 @st.cache_data
 def patient_state_data():
-    query = """SELECT STATE, COUNT(*) AS COUNT
-                FROM CORE.PATIENT
+    query = """SELECT STATE, COUNT(*) as COUNT
+                FROM CORE.PATIENT P
+                INNER JOIN TERMINOLOGY.ANSI_FIPS_STATE S
+                ON P.STATE = S.ANSI_FIPS_STATE_NAME
+                WHERE S.ANSI_FIPS_STATE_CODE <= 56 OR S.ANSI_FIPS_STATE_NAME = 'Puerto Rico'
                 GROUP BY 1;"""
     data = util.safe_to_pandas(conn, query)
+    return data
 
 
 @st.cache_data

@@ -1,10 +1,9 @@
-import pandas as pd
 import streamlit as st
-from streamlit_echarts import st_echarts
+from streamlit_echarts import st_echarts, JsCode, Map
 import util
 import toolz as to
 from palette import PALETTE
-from PIL import Image
+import json
 
 from streamlit_extras.metric_cards import style_metric_cards
 from streamlit_extras.app_logo import add_logo as st_add_logo
@@ -220,6 +219,66 @@ def donut_chart(df, quant, category, title, height="300px", colors=None):
         ],
     }
     st_echarts(options=options, height=height)
+
+
+def state_map_chart(df, state_col, value_col, title, height="500px"):
+    """State level map including Puerto Rico, other territories will not render"""
+
+    data_rows = [
+        {"name": row[state_col], "value": row[value_col]} for _, row in df.iterrows()
+    ]
+
+    data_min = df[value_col].min()
+    data_max = df[value_col].max()
+    formatter = JsCode(
+        "function (params) {"
+        + "var value = (params.value + '').split('.');"
+        + "value = value[0].replace(/(\d{1,3})(?=(?:\d{3})+(?!\d))/g, '$1,');"
+        + "return params.seriesName + '<br/>' + params.name + ': ' + value;}"
+    ).js_code
+
+    with open("./resources/data/USA.json", "r") as f:
+        map = Map(
+            "USA",
+            json.loads(f.read()),
+            {
+                "Alaska": {"left": -131, "top": 24, "width": 16},
+                "Hawaii": {"left": -115, "top": 27, "width": 5},
+                "Puerto Rico": {"left": -76, "top": 26, "width": 2},
+            },
+        )
+
+    options = {
+        "title": {
+            "text": title,
+            "left": "right",
+        },
+        "tooltip": {
+            "trigger": "item",
+            "showDelay": 0,
+            "transitionDuration": 0.2,
+            "formatter": formatter,
+        },
+        "visualMap": {
+            "left": "right",
+            "min": float(data_min),
+            "max": float(data_max),
+            "inRange": {"color": list(PALETTE.values())[4:]},
+        },
+        "series": [
+            {
+                "name": value_col,
+                "type": "map",
+                "roam": False,
+                "map": "USA",
+                "emphasis": {"label": {"show": True}},
+                "textFixed": {"Alaska": [20, -20]},
+                "data": data_rows,
+            }
+        ],
+    }
+
+    st_echarts(options, map=map, height=height)
 
 
 def add_logo():
