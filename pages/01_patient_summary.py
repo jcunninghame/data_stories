@@ -63,5 +63,11 @@ comp.generic_simple_h_bar(
 )
 
 comp.state_map_chart(
-    patient_state, "state", "count", "Patient Count by State", height="500px"
+    patient_state,
+    "state",
+    "count",
+    "Patient Count by State",
+    height="500px",
+    colors=ORDINAL,
+    subtext="Excludes Patients in Other US Territories",
 )

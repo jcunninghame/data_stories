@@ -221,9 +221,10 @@ def donut_chart(df, quant, category, title, height="300px", colors=None):
     st_echarts(options=options, height=height)
 
 
-def state_map_chart(df, state_col, value_col, title, height="500px"):
+def state_map_chart(
+    df, state_col, value_col, title, colors, height="500px", subtext=None
+):
     """State level map including Puerto Rico, other territories will not render"""
-
     data_rows = [
         {"name": row[state_col], "value": row[value_col]} for _, row in df.iterrows()
     ]
@@ -251,7 +252,8 @@ def state_map_chart(df, state_col, value_col, title, height="500px"):
     options = {
         "title": {
             "text": title,
-            "left": "right",
+            "subtext": subtext,
+            "left": "left",
         },
         "tooltip": {
             "trigger": "item",
@@ -263,7 +265,7 @@ def state_map_chart(df, state_col, value_col, title, height="500px"):
             "left": "right",
             "min": float(data_min),
             "max": float(data_max),
-            "inRange": {"color": list(PALETTE.values())[4:]},
+            "inRange": {"color": colors},
         },
         "series": [
             {
