@@ -15,7 +15,7 @@ def test_results():
     select * from data_profiling.test_result
     """
 
-    data = pd.read_csv(s3_uri + "test_results.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -25,7 +25,7 @@ def use_case():
     select * from data_profiling.use_case
     """
 
-    data = pd.read_csv(s3_uri + "use_case.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -37,7 +37,7 @@ def cost_summary():
         order by 1, 2, 3
     """
 
-    data = pd.read_csv(s3_uri + "cost_summary.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -55,7 +55,7 @@ def year_months():
         order by 1
     """
 
-    data = pd.read_csv(s3_uri + "year_months.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -99,7 +99,7 @@ def summary_stats():
     join elig using(year, quarter)
     """
 
-    data = pd.read_csv(s3_uri + "summary_stats.csv", converters=global_converters)
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -143,7 +143,7 @@ def pmpm_by_claim_type():
         join elig using(year_month)
     """
 
-    data = pd.read_csv(s3_uri + "pmpm_by_claim_type.csv", converters=global_converters)
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -176,7 +176,7 @@ def pmpm_by_service_category_1():
         join elig using(year_month)
     """
 
-    data = pd.read_csv(s3_uri + "pmpm_by_service_category_1.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -210,7 +210,7 @@ def pmpm_by_service_category_1_2():
         join elig using(year_month)
     """
 
-    data = pd.read_csv(s3_uri + "pmpm_by_service_category_1_2.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -245,8 +245,7 @@ def pmpm_by_service_category_1_provider(service_cat, year_month):
         from spend_summary
         join elig using(year_month)
     """
-    data_path = s3_uri + "pmpm_by_service_category_1_provider.csv"
-    data = dd.read_csv(data_path, storage_options={"anon": True})
+    data = util.safe_to_dask(conn, query)
     data = (
         data.loc[
             ((data["year_month"] == year_month) | (year_month == "All Time"))
@@ -294,7 +293,7 @@ def pmpm_by_service_category_1_condition():
         join elig using(year_month)
     """
 
-    data = pd.read_csv(s3_uri + "pmpm_by_service_category_1_condition.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -328,7 +327,7 @@ def pmpm_by_service_category_1_claim_type():
         join elig using(year_month)
     """
 
-    data = pd.read_csv(s3_uri + "pmpm_by_service_category_1_claim_type.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -342,8 +341,8 @@ def pmpm_data():
                          GROUP BY YEAR_MONTH) AS PB
               ON PT.YEAR_MONTH = PB.YEAR_MONTH;"""
 
-    data = pd.read_csv(s3_uri + "pmpm_data.csv")
-    # data["year_month"] = pd.to_datetime(data["year_month"], format="%Y-%m").dt.date
+    data = util.safe_to_pandas(conn, query)
+    data["year_month"] = pd.to_datetime(data["year_month"], format="%Y-%m").dt.date
     data["year"] = data["year_month"].str[:4]
     data["pharmacy_spend"] = data["pharmacy_spend"].astype(float)
 
@@ -354,7 +353,7 @@ def pmpm_data():
 def gender_data():
     query = """SELECT GENDER, COUNT(*) AS COUNT FROM CORE.PATIENT GROUP BY 1;"""
 
-    data = pd.read_csv(s3_uri + "gender_data.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -362,7 +361,7 @@ def gender_data():
 def race_data():
     query = """SELECT RACE, COUNT(*) AS COUNT FROM CORE.PATIENT GROUP BY 1;"""
 
-    data = pd.read_csv(s3_uri + "race_data.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -380,7 +379,7 @@ def age_data():
                 GROUP BY 1
                 ORDER BY 1;"""
 
-    data = pd.read_csv(s3_uri + "age_data.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -428,7 +427,7 @@ def pmpm_by_chronic_condition():
         order by 2, 1
     """
 
-    data = pd.read_csv(s3_uri + "pmpm_by_chronic_condition.csv")
+    data = util.safe_to_pandas(conn, query)
     return data
 
 
@@ -443,7 +442,7 @@ def condition_data():
               GROUP BY 1,2
               ORDER BY 3 DESC;"""
 
-    data = pd.read_csv(s3_uri + "condition_data.csv")
+    data = util.safe_to_pandas(conn, query)
     data["diagnosis_year"] = pd.to_datetime(
         data["diagnosis_year_month"]
     ).dt.year.astype(str)

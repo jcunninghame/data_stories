@@ -1,4 +1,5 @@
 import snowflake.connector as sn
+from dask.dataframe import from_pandas
 import pandas as pd
 import tomli
 
@@ -26,6 +27,11 @@ def safe_to_pandas(conn, query):
     data = data.rename(columns=rename_dict)
     for col in [x for x in data if ("amount" in x) or (x == "member_month_count")]:
         data[col] = pd.to_numeric(data[col])
+    return data
+
+
+def safe_to_dask(conn, query):
+    data = from_pandas(safe_to_pandas(conn, query), npartitions=1)
     return data
 
 
